@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CV | Pentester & Security Researcher</title>
+  <title>Manuel Guirao Rodríguez | Pentester & Security Researcher</title>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -491,7 +491,131 @@
     .reveal:nth-child(4) { transition-delay: .26s; }
     .reveal:nth-child(5) { transition-delay: .33s; }
 
-    /* ── TOOLTIP copied ── */
+    /* ── PROFILE BANNER ── */
+    .profile-banner {
+      display: flex; align-items: center; gap: 18px;
+      background: var(--panel);
+      border: 1px solid var(--dim);
+      border-left: 3px solid var(--green);
+      padding: 16px 22px;
+      margin-bottom: 32px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all .25s;
+      user-select: none;
+    }
+    .profile-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(0,255,65,.04), transparent);
+      opacity: 0; transition: opacity .25s;
+    }
+    .profile-banner:hover { border-left-color: var(--cyan); box-shadow: 0 0 24px rgba(0,229,255,.1); }
+    .profile-banner:hover::before { opacity: 1; }
+    .banner-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid var(--green);
+      background: var(--dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+      overflow: hidden;
+    }
+    .banner-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .banner-info { flex: 1; }
+    .banner-name {
+      font-family: var(--font-hud); font-size: .82rem;
+      color: #fff; letter-spacing: .08em;
+    }
+    .banner-role {
+      font-family: var(--font-mono); font-size: .68rem;
+      color: var(--cyan); margin-top: 2px;
+    }
+    .banner-hint {
+      font-family: var(--font-mono); font-size: .64rem;
+      color: var(--text2);
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .banner-hint::before { content: '▶'; color: var(--green); font-size: .55rem; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(4px);
+      z-index: 20000;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--panel);
+      border: 1px solid var(--dim);
+      border-top: 3px solid var(--cyan);
+      max-width: 520px; width: 90%;
+      padding: 36px 32px;
+      position: relative;
+      transform: translateY(20px) scale(.97);
+      transition: transform .3s;
+    }
+    .modal-overlay.open .modal-box { transform: none; }
+    .modal-close {
+      position: absolute; top: 14px; right: 18px;
+      font-family: var(--font-mono); font-size: .9rem;
+      color: var(--text2); cursor: pointer; background: none; border: none;
+      transition: color .2s;
+    }
+    .modal-close:hover { color: var(--red); }
+    .modal-photo-wrap {
+      display: flex; justify-content: center; margin-bottom: 22px;
+    }
+    .modal-photo {
+      width: 110px; height: 110px; border-radius: 50%;
+      border: 2px solid var(--cyan);
+      background: var(--dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; overflow: hidden;
+      box-shadow: 0 0 24px rgba(0,229,255,.2);
+    }
+    .modal-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .modal-name {
+      font-family: var(--font-hud); font-size: 1rem;
+      color: #fff; text-align: center; letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+    .modal-role {
+      font-family: var(--font-mono); font-size: .72rem;
+      color: var(--cyan); text-align: center; margin-bottom: 18px;
+    }
+    .modal-divider { height: 1px; background: var(--border); margin-bottom: 18px; }
+    .modal-desc {
+      font-family: var(--font-body); font-size: .92rem;
+      color: var(--text); line-height: 1.75; font-weight: 300;
+      text-align: center;
+    }
+    .modal-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-top: 18px;
+    }
+    .modal-tag {
+      font-family: var(--font-mono); font-size: .65rem;
+      border: 1px solid var(--dim); color: var(--text2);
+      padding: 3px 10px; border-radius: 2px;
+    }
+
+    /* ── TOOL CATEGORY ── */
+    .tool-category { margin-bottom: 22px; }
+    .tool-cat-label {
+      font-family: var(--font-mono); font-size: .65rem;
+      color: var(--text2); letter-spacing: .15em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .tool-cat-label span { color: var(--green); margin-right: 6px; }
+
+
     .copied-toast {
       position: fixed; bottom: 30px; right: 30px;
       background: var(--green); color: #000;
@@ -518,6 +642,40 @@
 <!-- COPIED TOAST -->
 <div class="copied-toast" id="toast">✓ Copiado al portapapeles</div>
 
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕ CERRAR</button>
+    <div class="modal-photo-wrap">
+      <div class="modal-photo" id="modal-photo">
+        <!-- Reemplaza el emoji por: <img src="tu-foto.jpg" alt="Manuel Guirao"> -->
+        👤
+      </div>
+    </div>
+    <div class="modal-name">MANUEL GUIRAO RODRÍGUEZ</div>
+    <div class="modal-role">Pentester · Security Researcher · OSCP Certified</div>
+    <div class="modal-divider"></div>
+    <div class="modal-desc">
+      <!-- ✏️ EDITA AQUÍ tu descripción personal -->
+      Apasionado por la ciberseguridad ofensiva desde temprana edad, con formación técnica
+      especializada y certificaciones de reconocimiento internacional. Me muevo cómodamente
+      entre la ingeniería de redes, el análisis de vulnerabilidades y el desarrollo de exploits
+      en Python. Disfruto resolviendo retos CTF, contribuyendo a bug bounty programs y
+      aprendiendo cada día algo nuevo en este campo en constante evolución.
+      Disponible para reubicación global — sin fronteras.
+    </div>
+    <div class="modal-tags">
+      <span class="modal-tag">#RedTeam</span>
+      <span class="modal-tag">#BugBounty</span>
+      <span class="modal-tag">#CTF</span>
+      <span class="modal-tag">#PythonExploits</span>
+      <span class="modal-tag">#OSINT</span>
+      <span class="modal-tag">#OpenToWork</span>
+    </div>
+  </div>
+</div>
+
+
 <div class="wrapper">
 
   <!-- ── HEADER ── -->
@@ -531,7 +689,8 @@
     </div>
 
     <h1 class="hero-name">
-      <span class="glitch" data-text="[TU NOMBRE]">[TU NOMBRE]</span>
+      <span class="glitch" data-text="MANUEL GUIRAO">MANUEL GUIRAO</span><br>
+      <span class="glitch" data-text="RODRÍGUEZ" style="font-size:clamp(1.6rem,4vw,2.8rem);color:#b0ccd8;">RODRÍGUEZ</span>
     </h1>
 
     <div class="hero-title">
@@ -554,6 +713,19 @@
       <span>DISPONIBLE PARA REUBICACIÓN GLOBAL &nbsp;·&nbsp; REMOTE / ON-SITE</span>
     </div>
   </header>
+
+  <!-- ── PROFILE BANNER ── -->
+  <div class="profile-banner reveal" onclick="openModal()">
+    <div class="banner-avatar" id="banner-avatar">
+      <!-- Reemplaza el emoji por: <img src="tu-foto.jpg" alt="Manuel"> -->
+      👤
+    </div>
+    <div class="banner-info">
+      <div class="banner-name">MANUEL GUIRAO RODRÍGUEZ</div>
+      <div class="banner-role">Pentester · Security Researcher · OSCP · CEH · Python Exploit Developer</div>
+    </div>
+    <div class="banner-hint">VER PERFIL</div>
+  </div>
 
   <div class="divider"></div>
 
@@ -691,6 +863,10 @@
         <div class="skill-track"><div class="skill-fill" data-pct="88"></div></div>
       </div>
       <div class="skill-row">
+        <div class="skill-meta"><span>Python Exploit Dev</span><span class="pct">85%</span></div>
+        <div class="skill-track"><div class="skill-fill" data-pct="85"></div></div>
+      </div>
+      <div class="skill-row">
         <div class="skill-meta"><span>Social Engineering</span><span class="pct">82%</span></div>
         <div class="skill-track"><div class="skill-fill" data-pct="82"></div></div>
       </div>
@@ -704,29 +880,64 @@
   <!-- ── HERRAMIENTAS ── -->
   <section class="reveal">
     <div class="section-label"><span class="num">05</span> ARSENAL / HERRAMIENTAS</div>
-    <div class="tools-wrap">
-      <span class="tool-chip">Kali Linux</span>
-      <span class="tool-chip">Metasploit</span>
-      <span class="tool-chip">Burp Suite Pro</span>
-      <span class="tool-chip">Nmap</span>
-      <span class="tool-chip">Nessus</span>
-      <span class="tool-chip">Wireshark</span>
-      <span class="tool-chip">Maltego</span>
-      <span class="tool-chip">Cobalt Strike</span>
-      <span class="tool-chip">BloodHound</span>
-      <span class="tool-chip">SQLmap</span>
-      <span class="tool-chip">Hydra</span>
-      <span class="tool-chip">John the Ripper</span>
-      <span class="tool-chip">OWASP ZAP</span>
-      <span class="tool-chip">Impacket</span>
-      <span class="tool-chip">Shodan</span>
-      <span class="tool-chip">theHarvester</span>
-      <span class="tool-chip">Recon-ng</span>
-      <span class="tool-chip">Hashcat</span>
-      <span class="tool-chip">Empire</span>
-      <span class="tool-chip">Ghidra</span>
-      <span class="tool-chip">Docker</span>
-      <span class="tool-chip">Git</span>
+
+    <div class="tool-category reveal">
+      <div class="tool-cat-label"><span>▸</span> Reconocimiento &amp; OSINT</div>
+      <div class="tools-wrap">
+        <span class="tool-chip">Nmap</span>
+        <span class="tool-chip">Gobuster</span>
+        <span class="tool-chip">Shodan</span>
+        <span class="tool-chip">Maltego</span>
+        <span class="tool-chip">theHarvester</span>
+        <span class="tool-chip">Recon-ng</span>
+        <span class="tool-chip">Amass</span>
+        <span class="tool-chip">Subfinder</span>
+        <span class="tool-chip">Masscan</span>
+      </div>
+    </div>
+
+    <div class="tool-category reveal">
+      <div class="tool-cat-label"><span>▸</span> Explotación &amp; Post-Explotación</div>
+      <div class="tools-wrap">
+        <span class="tool-chip">Metasploit</span>
+        <span class="tool-chip">Burp Suite Pro</span>
+        <span class="tool-chip">SQLmap</span>
+        <span class="tool-chip">Hydra</span>
+        <span class="tool-chip">Impacket</span>
+        <span class="tool-chip">BloodHound</span>
+        <span class="tool-chip">Cobalt Strike</span>
+        <span class="tool-chip">Empire</span>
+        <span class="tool-chip">CrackMapExec</span>
+        <span class="tool-chip">Responder</span>
+      </div>
+    </div>
+
+    <div class="tool-category reveal">
+      <div class="tool-cat-label"><span>▸</span> Análisis &amp; Forense</div>
+      <div class="tools-wrap">
+        <span class="tool-chip">Wireshark</span>
+        <span class="tool-chip">Nessus</span>
+        <span class="tool-chip">OWASP ZAP</span>
+        <span class="tool-chip">Ghidra</span>
+        <span class="tool-chip">John the Ripper</span>
+        <span class="tool-chip">Hashcat</span>
+        <span class="tool-chip">Volatility</span>
+        <span class="tool-chip">Autopsy</span>
+      </div>
+    </div>
+
+    <div class="tool-category reveal">
+      <div class="tool-cat-label"><span>▸</span> Desarrollo &amp; Scripting</div>
+      <div class="tools-wrap">
+        <span class="tool-chip">Python 3 (Exploits)</span>
+        <span class="tool-chip">Bash Scripting</span>
+        <span class="tool-chip">Pwntools</span>
+        <span class="tool-chip">Scapy</span>
+        <span class="tool-chip">Requests / aiohttp</span>
+        <span class="tool-chip">Git</span>
+        <span class="tool-chip">Docker</span>
+        <span class="tool-chip">Kali Linux</span>
+      </div>
     </div>
   </section>
 
@@ -806,7 +1017,7 @@
     <div class="section-label"><span class="num">08</span> CONTACTO</div>
     <div class="contact-row">
       <div class="contact-item" onclick="copyText('tu@email.com')">
-        <span class="ico">✉</span> tu@email.com
+        <span class="ico">✉</span> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8afeffcaefe7ebe3e6a4e9e5e7">[email&#160;protected]</a>
       </div>
       <div class="contact-item" onclick="copyText('+34 XXX XXX XXX')">
         <span class="ico">📱</span> +34 XXX XXX XXX
@@ -833,7 +1044,7 @@
 </div>
 
 <!-- ─────────── SCRIPTS ─────────── -->
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   /* ── BOOT SEQUENCE ── */
   const bootLines = [
     ['ok',   '[  OK  ] Loading security profile engine...'],
@@ -929,6 +1140,20 @@
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2000);
   }
+
+  /* ── MODAL ── */
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
 </html>
