@@ -135,9 +135,26 @@
     .tool-cat-label span{color:var(--green);margin-right:6px}
     .copied-toast{position:fixed;bottom:30px;right:30px;background:var(--green);color:#000;font-family:var(--font-mono);font-size:.75rem;padding:8px 18px;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:9000}
     .copied-toast.show{opacity:1;transform:none}
+
+    /* ═══════════════════════════════════════════════
+       PARALLAX BACKGROUND — ADDITIONS ONLY
+       ═══════════════════════════════════════════════ */
+    #cyber-parallax {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Lift content above the parallax canvas */
+    .wrapper, header { position: relative; z-index: 1; }
+    #boot { z-index: 10000; }
   </style>
 </head>
 <body>
+
+<!-- ═══ PARALLAX CANVAS — ADDED, NOTHING ELSE MODIFIED ═══ -->
+<canvas id="cyber-parallax"></canvas>
 
 <div id="boot">
   <div id="boot-log"><p class="comment">// Initializing secure profile viewer...</p></div>
@@ -399,6 +416,9 @@
   </footer>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     ORIGINAL SCRIPT — UNTOUCHED
+     ═══════════════════════════════════════════════════════════ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -506,6 +526,335 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 }); // DOMContentLoaded
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PARALLAX BACKGROUND — NEW SCRIPT, NOTHING ABOVE MODIFIED
+     Three independent layers rendered on a single canvas:
+       Layer A — Matrix rain (green falling chars)
+       Layer B — Network topology (nodes + edges, mouse parallax)
+       Layer C — Floating data strings (hex/IP/CVE labels)
+     + Horizontal scan beam sweeping continuously
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  'use strict';
+
+  var canvas = document.getElementById('cyber-parallax');
+  var ctx    = canvas.getContext('2d');
+
+  /* ── colours matching the page's CSS variables ── */
+  var C_GREEN  = '#00ff41';
+  var C_CYAN   = '#00e5ff';
+  var C_DIM    = '#1a3a4a';
+  var C_PANEL  = '#0a1520';
+
+  /* ── resize ── */
+  function resize(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initMatrix();
+    initNodes();
+  }
+  window.addEventListener('resize', resize);
+
+  /* ══════════════════════════════════════════
+     LAYER A — MATRIX RAIN
+     ══════════════════════════════════════════ */
+  var COLS, drops, MATRIX_CHARS;
+  var FONT_SZ = 13;
+
+  function initMatrix(){
+    MATRIX_CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    COLS  = Math.floor(canvas.width / FONT_SZ);
+    drops = [];
+    for(var i = 0; i < COLS; i++){
+      drops[i] = Math.random() * -canvas.height / FONT_SZ;
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     LAYER B — NETWORK TOPOLOGY NODES
+     ══════════════════════════════════════════ */
+  var NODE_COUNT = 38;
+  var nodes = [];
+
+  function initNodes(){
+    nodes = [];
+    for(var i = 0; i < NODE_COUNT; i++){
+      nodes.push({
+        x   : Math.random() * canvas.width,
+        y   : Math.random() * canvas.height,
+        vx  : (Math.random() - 0.5) * 0.32,
+        vy  : (Math.random() - 0.5) * 0.32,
+        r   : 1.5 + Math.random() * 2.5,
+        /* parallax depth 0..1 — lower = deeper = moves less */
+        depth: 0.15 + Math.random() * 0.65,
+        /* pulse phase */
+        phase: Math.random() * Math.PI * 2,
+        /* flag: is this a labelled node? */
+        label: Math.random() < 0.28
+      });
+    }
+  }
+
+  /* ══════════════════════════════════════════
+     LAYER C — FLOATING DATA STRINGS
+     ══════════════════════════════════════════ */
+  var DATA_POOL = [
+    '0x4A8F2C01','192.168.1.1','10.0.0.254','172.16.0.1',
+    'CVE-2024-1234','CVE-2023-44487','CVE-2021-44228',
+    'PAYLOAD:0x90','NOP SLED','SHELLCODE','HEAP OVERFLOW',
+    'PORT:4444','PORT:8080','PORT:443','PORT:22',
+    '0xDEADBEEF','0xCAFEBABE','0xBADC0DE','0x41414141',
+    '/bin/sh -i','nc -e /bin/sh','wget http://','curl -s',
+    'HASH:MD5','SHA256:a3f…','bcrypt:$2b$','RSA-4096',
+    'MITM ACTIVE','ARP SPOOF','DNS POISON','REPLAY ATK',
+    'METASPLOIT','METERPRETER','COBALT STRIKE','EMPIRE',
+    'USER:root','UID=0(root)','PRIVESC OK','SUDO -L',
+    'SCAN COMPLETE','VULN FOUND','EXPLOIT RDY','PWN!'
+  ];
+
+  var floaters = [];
+  var FLOAT_COUNT = 22;
+
+  function initFloaters(){
+    floaters = [];
+    for(var i = 0; i < FLOAT_COUNT; i++){
+      floaters.push(makeFloater());
+    }
+  }
+
+  function makeFloater(){
+    return {
+      text  : DATA_POOL[Math.floor(Math.random() * DATA_POOL.length)],
+      x     : Math.random() * canvas.width,
+      y     : Math.random() * canvas.height,
+      vy    : -0.18 - Math.random() * 0.22,   /* drift upward */
+      vx    : (Math.random() - 0.5) * 0.12,
+      alpha : 0.04 + Math.random() * 0.13,
+      size  : 9 + Math.random() * 5,
+      depth : 0.1 + Math.random() * 0.55,
+      color : Math.random() < 0.5 ? C_GREEN : C_CYAN
+    };
+  }
+
+  /* ══════════════════════════════════════════
+     PARALLAX / MOUSE STATE
+     ══════════════════════════════════════════ */
+  var scrollY = 0;
+  var mouseX  = 0;
+  var mouseY  = 0;
+
+  window.addEventListener('scroll', function(){
+    scrollY = window.scrollY || window.pageYOffset;
+  });
+  window.addEventListener('mousemove', function(e){
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  /* ══════════════════════════════════════════
+     SCAN BEAM
+     ══════════════════════════════════════════ */
+  var beamY    = 0;
+  var BEAM_SPD = 1.1;
+
+  /* ══════════════════════════════════════════
+     MAIN RENDER LOOP
+     ══════════════════════════════════════════ */
+  var frame = 0;
+
+  function draw(){
+    frame++;
+    var W = canvas.width, H = canvas.height;
+    var mx = (mouseX / W - 0.5);   /* -0.5 .. 0.5 */
+    var my = (mouseY / H - 0.5);
+
+    /* ── clear with near-opaque bg so trails fade ── */
+    ctx.fillStyle = 'rgba(5,10,14,0.18)';
+    ctx.fillRect(0, 0, W, H);
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYER A — matrix rain
+       parallax: columns shifted by scrollY * 0.04
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    ctx.font = FONT_SZ + 'px "Share Tech Mono", monospace';
+    ctx.textBaseline = 'top';
+
+    var scrollShiftA = scrollY * 0.04;
+
+    for(var c = 0; c < COLS; c++){
+      var ch   = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+      var cy   = (drops[c] * FONT_SZ + scrollShiftA) % (H + 80);
+      var cx   = c * FONT_SZ;
+      var frac = (drops[c] % 30) / 30;  /* position along trail */
+
+      if(frac > 0.97){
+        /* bright head */
+        ctx.fillStyle = 'rgba(200,255,220,0.88)';
+      } else {
+        var a = Math.max(0, frac * 0.32);
+        ctx.fillStyle = 'rgba(0,255,65,' + a.toFixed(2) + ')';
+      }
+      ctx.fillText(ch, cx, cy);
+
+      drops[c] += 0.38 + (c % 5) * 0.06;
+      if(drops[c] * FONT_SZ > H + 80 && Math.random() > 0.975){
+        drops[c] = -Math.random() * 20;
+      }
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYER B — network topology
+       parallax: nodes offset by scroll * depth * 0.18
+                 + mouse parallax * depth * 28
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    var EDGE_DIST = 180;
+
+    /* update positions */
+    for(var i = 0; i < nodes.length; i++){
+      var n = nodes[i];
+      n.x += n.vx;  n.y += n.vy;
+      if(n.x < -20)   n.x = W + 20;
+      if(n.x > W + 20) n.x = -20;
+      if(n.y < -20)   n.y = H + 20;
+      if(n.y > H + 20) n.y = -20;
+    }
+
+    /* draw edges */
+    for(var i = 0; i < nodes.length; i++){
+      var ni = nodes[i];
+      var nix = ni.x + mx * ni.depth * 28 - scrollY * ni.depth * 0.12;
+      var niy = ni.y + my * ni.depth * 28;
+
+      for(var j = i + 1; j < nodes.length; j++){
+        var nj  = nodes[j];
+        var njx = nj.x + mx * nj.depth * 28 - scrollY * nj.depth * 0.12;
+        var njy = nj.y + my * nj.depth * 28;
+
+        var dx = nix - njx, dy = niy - njy;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < EDGE_DIST){
+          var ea = (1 - dist/EDGE_DIST) * 0.12 * ni.depth;
+          /* data packet travelling along edge every ~300 frames */
+          var tPacket = (frame * 0.8 + i * 47 + j * 13) % 300;
+          if(tPacket < 30){
+            /* animated packet bead */
+            var t  = tPacket / 30;
+            var px = nix + (njx - nix) * t;
+            var py = niy + (njy - niy) * t;
+            ctx.save();
+            ctx.globalAlpha = 0.55 * (1 - Math.abs(t - 0.5) * 2);
+            ctx.fillStyle   = C_CYAN;
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            ea *= 1.6;  /* brighter edge during packet */
+          }
+          ctx.strokeStyle = 'rgba(0,229,255,' + ea.toFixed(3) + ')';
+          ctx.lineWidth   = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(nix, niy);
+          ctx.lineTo(njx, njy);
+          ctx.stroke();
+        }
+      }
+    }
+
+    /* draw nodes */
+    for(var i = 0; i < nodes.length; i++){
+      var n  = nodes[i];
+      var nx = n.x + mx * n.depth * 28 - scrollY * n.depth * 0.12;
+      var ny = n.y + my * n.depth * 28;
+      var pulse = 0.5 + 0.5 * Math.sin(n.phase + frame * 0.025);
+
+      /* outer glow ring */
+      ctx.save();
+      ctx.globalAlpha = 0.08 * pulse * n.depth;
+      ctx.strokeStyle = C_CYAN;
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.arc(nx, ny, n.r * 3.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      /* core dot */
+      ctx.save();
+      ctx.globalAlpha = (0.25 + 0.2 * pulse) * n.depth;
+      ctx.fillStyle   = n.label ? C_GREEN : C_CYAN;
+      ctx.beginPath();
+      ctx.arc(nx, ny, n.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYER C — floating data strings
+       parallax: upward drift + scroll * depth * 0.25
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    ctx.textBaseline = 'alphabetic';
+    for(var i = 0; i < floaters.length; i++){
+      var fl = floaters[i];
+      fl.x  += fl.vx;
+      fl.y  += fl.vy;
+
+      var ry = fl.y - scrollY * fl.depth * 0.25;
+
+      /* recycle when off-screen */
+      if(ry < -40 || fl.y > H + 60){
+        var nf = makeFloater();
+        nf.y  = H + 20;
+        floaters[i] = nf;
+        continue;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = fl.alpha;
+      ctx.font        = fl.size + 'px "Share Tech Mono", monospace';
+      ctx.fillStyle   = fl.color;
+      ctx.fillText(fl.text, fl.x, ry);
+      ctx.restore();
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SCAN BEAM — horizontal gradient sweep
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    beamY += BEAM_SPD;
+    if(beamY > H + 60) beamY = -60;
+
+    var grad = ctx.createLinearGradient(0, beamY - 28, 0, beamY + 28);
+    grad.addColorStop(0,   'rgba(0,229,255,0)');
+    grad.addColorStop(0.45,'rgba(0,229,255,0.045)');
+    grad.addColorStop(0.5, 'rgba(0,229,255,0.11)');
+    grad.addColorStop(0.55,'rgba(0,229,255,0.045)');
+    grad.addColorStop(1,   'rgba(0,229,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, beamY - 28, W, 56);
+
+    /* thin bright line at beam centre */
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.strokeStyle = C_CYAN;
+    ctx.lineWidth   = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, beamY);
+    ctx.lineTo(W, beamY);
+    ctx.stroke();
+    ctx.restore();
+
+    requestAnimationFrame(draw);
+  }
+
+  /* ── kick off after page load ── */
+  window.addEventListener('load', function(){
+    resize();
+    initFloaters();
+    requestAnimationFrame(draw);
+  });
+
+})();
 </script>
 </body>
 </html>
